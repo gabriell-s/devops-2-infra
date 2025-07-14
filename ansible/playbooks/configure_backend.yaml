@@ -1,0 +1,48 @@
+- name: Configurar ArgoCD backend
+  hosts: k8s_backend
+  become: yes
+  vars:
+    argocd_app_name: "devops-2-backend"
+    argocd_git_repo_url: "https://github.com/gabriell-s/devops-2-backend.git"
+    argocd_git_target_revision: "main"
+    argocd_git_path: "k8s"
+    argocd_app_namespace: "default"
+
+  tasks:
+    - name: Criar namespace argocd, se não existir
+      shell: kubectl create namespace argocd || true
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Esperar ArgoCD Server ficar disponível
+      shell: kubectl -n argocd wait --for=condition=available deployment/argocd-server --timeout=120s
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Criar Application ArgoCD para GitOps
+      shell: |
+        kubectl apply -f - <<EOF
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: {{ argocd_app_name }}
+          namespace: argocd
+        spec:
+          project: default
+          source:
+            repoURL: "{{ argocd_git_repo_url }}"
+            targetRevision: "{{ argocd_git_target_revision }}"
+            path: "{{ argocd_git_path }}"
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: "{{ argocd_app_namespace }}"
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+        EOF
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+    - name: Exibir mensagem de sucesso
+      debug:
+        msg: "Application ArgoCD '{{ argocd_app_name }}' criada com sucesso!"

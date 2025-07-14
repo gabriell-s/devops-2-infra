@@ -1,0 +1,43 @@
+- name: Instalar ArgoCD no frontend e backend
+  hosts: k8s_frontend,k8s_backend
+  become: yes
+
+  tasks:
+    - name: Instalar kubectl
+      become: yes
+      shell: |
+        curl -sLo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.27.0/bin/linux/amd64/kubectl
+        chmod +x /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+        
+    - name: Criar namespace argocd
+      shell: kubectl create namespace argocd || true
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Aplicar manifests oficiais do ArgoCD
+      shell: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Patchar o Service argocd-server para NodePort
+      shell: |
+        kubectl -n argocd patch svc argocd-server -p '{"spec": {"type": "NodePort"}}'
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Esperar ArgoCD Server ficar pronto
+      shell: kubectl -n argocd wait --for=condition=available deployment/argocd-server --timeout=120s
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Obter porta NodePort do argocd-server
+      shell: kubectl -n argocd get svc argocd-server -o jsonpath='{.spec.ports[0].nodePort}'
+      register: argocd_nodeport
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+
+    - name: Mostrar porta NodePort do ArgoCD
+      debug:
+        msg: "ArgoCD Server NodePort: {{ argocd_nodeport.stdout }}"

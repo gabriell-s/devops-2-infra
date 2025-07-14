@@ -1,0 +1,2 @@
+app_env_vars:
+  VITE_API_URL: "http://192.168.56.152"

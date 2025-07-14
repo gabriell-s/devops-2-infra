@@ -1,0 +1,64 @@
+- name: Configurar clusters Kubernetes com kind
+  hosts: k8s_all
+  become: true
+
+  tasks:
+    - name: Instalar Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Iniciar e habilitar serviço Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Baixar binário do kind
+      get_url:
+        url: https://github.com/kubernetes-sigs/kind/releases/download/v0.20.0/kind-linux-amd64
+        dest: /usr/local/bin/kind
+        mode: '0755'
+
+    - name: Criar arquivo de configuração do kind
+      copy:
+        dest: /tmp/kind-config.yaml
+        content: |
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+            - role: control-plane
+            - role: worker
+            - role: worker
+
+    - name: Deletar cluster kind existente e criar novo cluster
+      shell: |
+        kind delete cluster --name cluster || true
+        kind create cluster --name cluster --config /tmp/kind-config.yaml
+      environment:
+        KUBECONFIG: /root/.kube/config
+
+    - name: Criar diretório .kube para usuário vagrant
+      file:
+        path: /home/vagrant/.kube
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0700'
+
+    - name: Copiar kubeconfig para usuário vagrant
+      copy:
+        remote_src: yes
+        src: /root/.kube/config
+        dest: /home/vagrant/.kube/config
+        owner: vagrant
+        group: vagrant
+        mode: '0600'
+
+    - name: Ajustar proprietário e permissões do kubeconfig
+      file:
+        path: /home/vagrant/.kube/config
+        owner: vagrant
+        group: vagrant
+        mode: '0600'
