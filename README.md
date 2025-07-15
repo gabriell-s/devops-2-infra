@@ -21,7 +21,7 @@ Inicialmente, a ideia era utilizar cada VM como um nó Kubernetes independente. 
 
 Cada VM possui os seguintes recursos:
 
-- **1 CPU**
+- **2 CPU**
 - **2 GB de RAM**
 
 ---
@@ -31,8 +31,26 @@ Cada VM possui os seguintes recursos:
 O provisionamento da infraestrutura foi realizado com o uso das seguintes ferramentas:
 
 - **Packer:** Responsável por gerar a imagem `.box` utilizada pelas VMs.  
+```bash
+packer init .
+packer plugin install github.com/hashicorp/virtualbox
+packer plugin install github.com/hashicorp/vagrant
+packer build debian.json
+mv debian12.box vagrant/
+```
 - **Vagrant:** Utilizado para levantar as três máquinas virtuais.  
-- **Ansible:** Automatiza a configuração de cada máquina, como instalação de pacotes e setup do ambiente.
+```bash
+cd vagrant
+vagrant box add debian12 debian12.box
+vagrant up
+sh ./add_ssh_figerprints.sh
+```
+- **Ansible:** Automatiza a configuração de cada máquina, como instalação de pacotes e setup do ambiente.  
+```bash
+cd ansible
+ansible-playbook -i inventory/hosts.ini playbooks/main.yaml
+```
+
 
 ---
 
