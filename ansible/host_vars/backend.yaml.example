@@ -1,3 +1,0 @@
-app_env_vars:
-  DATABASE_URL: "postgresql://user:password@host:5432/database"
-  SECRET_KEY: "your-secret-key-here"
