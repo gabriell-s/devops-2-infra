@@ -1,5 +1,0 @@
-kind_host_port: 5432
-kind_container_port: 5432
-pg_user: devops
-pg_password: devops
-pg_database: devops_db

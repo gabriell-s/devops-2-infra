@@ -1,5 +1,0 @@
-app_env_vars:
-  DATABASE_URL: "postgresql://devops:devops@192.168.56.153:5432/devops"
-  SECRET_KEY: "secret123"
-kind_host_port: 8080
-kind_container_port: 8080

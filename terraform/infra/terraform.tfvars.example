@@ -1,0 +1,5 @@
+eks_admin_user_arn = arn:aws:iam::{}:user/{}
+db_username        = "{}"
+db_password        = "{}"
+db_name            = "{}"
+secret_key         = "{}"

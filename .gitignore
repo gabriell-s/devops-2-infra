@@ -1,3 +1,5 @@
-.vagrant/
-
-vagrant/*.box
+terraform.tfvars
+*.tfstate*
+*.lock.hcl
+*.lock.info
+.terraform

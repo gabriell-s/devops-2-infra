@@ -1,4 +1,0 @@
-app_env_vars:
-  VITE_API_URL: "http://192.168.56.152"
-kind_host_port: 8000
-kind_container_port: 8000
