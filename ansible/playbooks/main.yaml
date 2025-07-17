@@ -7,11 +7,14 @@
 - name: Instalar ArgoCD nos clusters frontend e backend
   import_playbook: install_argocd.yaml
 
+- name: Aplicar secrets específicos para cada cluster backend
+  import_playbook: apply_secret_backend.yaml
+
+- name: Aplicar secrets específicos para cada cluster frontend
+  import_playbook: apply_secret_frontend.yaml
+  
 - name: Configurar aplicação backend no ArgoCD
   import_playbook: configure_backend.yaml
 
 - name: Configurar aplicação frontend no ArgoCD
   import_playbook: configure_frontend.yaml
-
-- name: Aplicar secrets específicos para cada cluster
-  import_playbook: apply_secret.yaml
